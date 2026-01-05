@@ -1,0 +1,84 @@
+Bharatiya Bank of India's Sunrise Branch in Nashik, Maharashtra, uncovered a ₹2.11-crore fraud perpetrated over 11 years by Mr. Ranadeep Ram, a Senior Associate. The fraud exploited weak internal controls, inadequate segregation of duties, and extreme over-reliance on a single trusted employee.
+
+Background
+
+Ranadeep joined Sunrise Branch in March 2013 with 15 years of banking experience and a clean record. When Bharatiya Bank merged with adjoining Pashan Mini Branch into Sunrise in 2016, his responsibilities expanded to manage 3,200 retail and 180 MSME accounts. Over 11 years, he became the branch's institutional backbone, handling front-desk operations, lending authorizations, STDR (Special Term Deposit Receipt) management, and insurance cross-selling. His prompt customers service, and patient demeanor made him indispensable. Pensioners, farmers, and small traders requested transactions exclusively with Rajesh, viewing him as a trusted family advisor.
+
+Branch Manager Mr. Anuj Kumar heavily over-relied on Mr. Ranadeep to meet aggressive business targets, frequently delegating verification tasks informally. His high business metrics enhanced his performance ratings, creating a dangerous misalignment where business growth took priority over control verification. Ranadeep’s visible lifestyle—luxury car and expensive dress—far exceeded his official salary, yet controllers never questioned this anomaly.
+
+The Control Gap
+
+On 31 October 2024, Ranadeep received a transfer order for Riverside Branch. He never reported. Mr. Kumar instead emailed the RBO requesting that he may be retained on "deputation" for RFIA preparation. The understaffed RBO issued no formal approval. Ranadeep continued appearing at Sunrise daily.
+
+A critical vulnerability emerged: Ranadeep’s CBS ID remained mapped to Sunrise branch for six months despite his transfer. CBS logs showed suspicious transactions under his credentials at Sunrise until 9 April 2025. Afterwards, similar pattern of transactions was observed in junior clerk Mr. Anand Agochar’s ID, suggesting Ranadeep was using Mr. Agochar’s credentials through shared passwords. 
+
+Discovery and Fallout
+
+The fraud surfaced in July 2025 when retired civil servant Mr. Pratyush Saxena discovered his ₹5-lakh STDR missing and an unauthorized withdrawal. Within weeks, 37 customers came forward. Forensic findings revealed:₹67 lakhs in unauthorized debits across 34 customers₹42 lakhs in misappropriated deposits, 23 fraudulent STDRs (₹84 lakhs)12 insurance policies (₹18 lakhs diverted).
+
+Fraud Schemes
+
+Over 8–10 years, Rajesh perpetrated overlapping schemes targeting vulnerable customers—pensioners, farmers, illiterate traders, and those with deactivated SMS alerts.
+
+Unauthorized Debits: Convincing customers that "government schemes" required temporary debits, he executed unauthorized withdrawals from savings accounts.
+
+STDR Manipulation: Issuing physical receipts without CBS entries, he later produced forged renewal forms at lower interest rates, pocketing the differential.
+
+Cash Embezzlement: Receiving bulk deposits, he either did not credit accounts or credited substantially lower amounts, retaining the difference.
+
+Insurance Fraud: Opening Life policies without consent, he surrendered them within years, issuing forged receipts showing lower proceeds than actually received.
+
+
+Hi, SRIJAN. When you submit this form, the owner will see your name and email address.
+1.Which combination of metrics, if monitored systematically at the branch level, would have most likely detected Ranadeep fraud earlier?
+(1 Point)
+
+ 
+
+Number of new accounts opened in the branch per month
+
+High concentration of transactions under a single user ID, repeated STDR closures within 30–90 days, frequent KCC advances near sanction limits, and high cash receipt-to-crediting variance ratios
+
+Volume of ATM withdrawals by retail customer
+
+Frequency of staff transfers across branches
+2.Ranadeep deliberately targeted customers with deactivated SMS alerts. Which of the following best explains why such customers are at higher risk of account fraud?
+(1 Point)
+
+They are restricted to branch-based transactions exclusively
+
+They are exempt from KYC requirements and therefore easier to exploit
+
+They deposit larger sums of money than urban customers
+
+They lack financial literacy and are not aware of the banking process
+3.Ranadeep’s CBS ID remained mapped to Sunrise Branch for six months after his official HR transfer to Riverside Branch. From a logical access control and fraud risk perspective, this mismatch is best classified as:
+(1 Point)
+
+A purely IT-related issue beyond BM’s scope
+
+A regulatory compliance issue affecting only external auditors
+
+A minor administrative error with negligible risk impact
+
+A critical control gap that enabled unauthorized transactions and obscured accountability
+4.After Ranadeep’s CBS ID was deactivated on 16 April 2025, his activities continued through Anand Agochar’s credentials. Which control would be most effective in preventing such credential misuse?
+(1 Point)
+
+Allowing biometric authentication
+
+Implementing multi-factor authentication, session monitoring, and strict enforcement of non-sharing policies with automated logout after inactivity
+
+Using only manual registers for all transactions
+
+Restricting all staff to single-user workstations without login capability
+5.Which of the following most accurately represents the primary internal control weakness that enabled Ranadeep Ram fraud over 11 years?
+(1 Point)
+
+Absence of a whistleblower
+
+Lack of automated fraud detection tools in CBS
+
+Failure to implement voice-call recording at the branch
+
+Over-reliance on a single employee without effective segregation of duties, independent verification, and periodic rotation
