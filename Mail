@@ -1,0 +1,33 @@
+Dear YONO 2.0 Product Team,
+
+I would like to suggest a few user-centric and security-focused feature enhancements for YONO 2.0 that can significantly improve customer experience, financial discipline, and fraud prevention.
+
+**1. CIBIL Score Check (Search-Enabled)**
+Introduce an in-app feature to check a user’s CIBIL score directly within YONO 2.0. This feature should be searchable via the global search box for quick access. It will help users track credit health, improve loan readiness, and increase engagement with SBI’s credit ecosystem.
+
+**2. One-Tap Emergency Transaction Block**
+Add an emergency “Block All Transactions” option that allows users to instantly block all debit transactions (UPI, cards, net banking) with a single tap in case of suspected account compromise or hacking. This will act as a critical safety switch and can later be reversed after verification.
+
+**3. Invisible Savings (Smart Auto-Hold Feature)**
+Introduce an “Invisible Savings” option where a small user-defined amount is automatically held whenever the account gets credited.
+
+* The held amount should only apply on credit events (no penalty if balance is insufficient).
+* If there is no credit, nothing is deducted or held.
+* The savings amount remains invisible for regular spending but can be unlocked and used anytime if the user enables it.
+  This feature promotes savings without impacting normal transactions.
+
+**4. Balance Threshold Alert & Transaction Control**
+Provide a configurable balance threshold feature (e.g., ₹1000).
+
+* When the account balance reaches the set limit, the user receives an alert stating “Limit Reached.”
+* Users can then choose whether to allow or restrict further transactions beyond this limit.
+  This adds better spending control and awareness.
+
+These features collectively enhance **security, financial discipline, credit awareness, and user trust**, aligning well with YONO’s vision of a smart and secure digital banking platform.
+
+Thank you for considering these suggestions.
+
+Regards,
+**Srijan Kumar Sah**
+Developer & YONO User
+
