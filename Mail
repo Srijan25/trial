@@ -1,33 +1,65 @@
-Dear YONO 2.0 Product Team,
+CASELET
+The Forgotten Fixed Deposit in Rajkot 
+Moderators :  Smt Jyotsana SSharma, CM (Faculty), SBSC, Hyderabad 
+ 
 
-I would like to suggest a few user-centric and security-focused feature enhancements for YONO 2.0 that can significantly improve customer experience, financial discipline, and fraud prevention.
+In 2009, Mrs. Shalini Desai, a homemaker from Rajkot, invested her savings into a fixed deposit at her neighbourhood bank branch. At the time, she intended it to be a safe cushion for future needs. However, as the years passed, she became increasingly occupied with household responsibilities, caring for her family, and managing daily life. As a result, she neither renewed the fixed deposit upon its maturity nor carried out any transactions that would keep the account active. 
 
-**1. CIBIL Score Check (Search-Enabled)**
-Introduce an in-app feature to check a user’s CIBIL score directly within YONO 2.0. This feature should be searchable via the global search box for quick access. It will help users track credit health, improve loan readiness, and increase engagement with SBI’s credit ecosystem.
+The deposit matured in 2019, but since there were no customer-induced transactions for a continuous period of ten years, the bank—following the Reserve Bank of India (RBI) guidelines—classified the deposit as “unclaimed.” Consequently, the balance was transferred to a fund created by RBI to protect dormant money and promote financial literacy.
 
-**2. One-Tap Emergency Transaction Block**
-Add an emergency “Block All Transactions” option that allows users to instantly block all debit transactions (UPI, cards, net banking) with a single tap in case of suspected account compromise or hacking. This will act as a critical safety switch and can later be reversed after verification.
+In 2022, while reviewing his late mother’s financial history, Mrs. Desai’s son visited the branch to enquire about any old or forgotten accounts. Using the UDGAM portal, an online platform introduced by RBI to help customers search for unclaimed deposits across multiple banks, he discovered that his mother’s fixed deposit had indeed been transferred to the DEAF account due to prolonged inactivity.
 
-**3. Invisible Savings (Smart Auto-Hold Feature)**
-Introduce an “Invisible Savings” option where a small user-defined amount is automatically held whenever the account gets credited.
+The bank staff guided him through the reclaiming process. Once all documents were verified and the branch was satisfied with the legitimacy of the claim, the bank processed the request. The account was reactivated for settlement purposes, and the due amount—which included principal plus interest (as mandated by RBI for unclaimed interest-bearing deposits transferred to the DEAF)—was credited to the legal heir. 
+with this info answer the following
 
-* The held amount should only apply on credit events (no penalty if balance is insufficient).
-* If there is no credit, nothing is deducted or held.
-* The savings amount remains invisible for regular spending but can be unlocked and used anytime if the user enables it.
-  This feature promotes savings without impacting normal transactions.
+Hi, SRIJAN. When you submit this form, the owner will see your name and email address.
+1.Since Mrs. Desai passed away without registering a nominee, which of the following documents became mandatory for her son to claim the amount?
+(1 Point)
 
-**4. Balance Threshold Alert & Transaction Control**
-Provide a configurable balance threshold feature (e.g., ₹1000).
+Survivor certificate issued by the bank manager
 
-* When the account balance reaches the set limit, the user receives an alert stating “Limit Reached.”
-* Users can then choose whether to allow or restrict further transactions beyond this limit.
-  This adds better spending control and awareness.
+Self-declaration and PAN card
 
-These features collectively enhance **security, financial discipline, credit awareness, and user trust**, aligning well with YONO’s vision of a smart and secure digital banking platform.
+Indemnity bond from a gazetted officer
 
-Thank you for considering these suggestions.
+Succession certificate proving legal heirship
+2.Which of the following is the primary reason the UDGAM portal played a crucial role in the son’s discovery process?
+(1 Point)
 
-Regards,
-**Srijan Kumar Sah**
-Developer & YONO User
+It allows users to directly withdraw money from DEAF
 
+It helps banks generate succession certificates
+
+It centralizes unclaimed deposit information across multiple banks
+
+It automatically renews unclaimed fixed deposits
+3.For Mrs. Desai’s fixed deposit, which specific condition triggered the transfer of funds to the DEA Fund?
+(1 Point)
+
+Non-renewal of the fixed deposit on the maturity date
+
+Failure to update KYC for more than five years
+
+Death of the account holder without nomination
+
+Absence of any customer-induced transaction for ten years after account opening/maturity
+4.Which of the following best explains why the bank could pay interest on Mrs. Desai’s deposit even after it was transferred to the DEA Fund?
+(1 Point)
+
+Interest is automatically credited by the UDGAM portal at the time of claim
+
+RBI mandates that all DEAF balances earn the same interest as savings accounts
+
+Interest is payable only if the bank chooses to award it as a goodwill gesture
+
+RBI allows banks to pay interest on unclaimed interest-bearing deposits that get transferred to DEAF
+5.In the claim process described to son of Mrs Desai, which entity is responsible for reimbursing the bank after it has settled the claim with the legal heir?
+(1 Point)
+
+UDGAM Portal Authority
+
+Deposit Insurance and Credit Guarantee Corporation (DICGC)
+
+Ministry of Finance
+
+Depositor Education and Awareness Fund (DEA Fund) maintained by RBI
