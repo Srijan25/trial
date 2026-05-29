@@ -1,65 +1,63 @@
-CASELET
-The Forgotten Fixed Deposit in Rajkot 
-Moderators :  Smt Jyotsana SSharma, CM (Faculty), SBSC, Hyderabad 
- 
+ public String getPositioningDatas(String date){
+        GenericResponse response = new GenericResponse();
+        ObjectMapper map = new ObjectMapper();
+        List<RatePosition> positioningData = positioningDataRepository.findAllDealsByDate(date);
+        List<Map<String, String>> resData = new ArrayList<>();
+        try {
+            for(RatePosition tm:positioningData) {
+                Map<String, String> d = new HashMap<>();
+                d.put("F_ID", String.valueOf(tm.getF_ID()));
+                d.put("f_STATUS", tm.getF_STATUS());
+                d.put("rf_STATUS", tm.getF_STATUS());
+                d.put("F_REQUEST_TIME", String.valueOf(tm.getF_REQUEST_TIME()));
+                d.put("F_EVENT", tm.getF_EVENT());
+                d.put("F_SRC_SYSTEM", tm.getF_SRC_SYSTEM());
+                d.put("F_DEAL_TYPE", tm.getF_DEAL_TYPE());
+                d.put("F_EXT_NO",tm.getF_EXT_NO());
+                d.put("F_ORIG_ID", String.valueOf(tm.getF_ORIG_ID()));
+                if(Objects.equals(tm.getF_STATUS(), "I")){
+                    d.put("ERROR_DETAILS","Problem in generating XML");
+                }
+                d.put("ERROR_DETAILS",tm.getF_ERROR() == null ? "Error in Murex" : tm.getF_ERROR());
+                if(Objects.equals(tm.getF_STATUS(), "S")){
+                    List<FxsMurexService> p = tm.getPositioningData();
+                    p.stream()
+                            .filter(item -> "S".equals(item.getF_STATUS()))
+                            .findFirst()
+                            .map(Optional::of)
+                            .orElseGet(() -> p.stream().max(Comparator.comparing(FxsMurexService::getF_REQUEST_TIME)))
+                            .ifPresent(target -> {
+                                d.put("F_MUREX_STATUS", target.getF_STATUS());
+                                if (Objects.equals(target.getF_STATUS(), "S")){
+                                    d.put("ERROR_DETAILS","Success");
+                                } else if (Objects.equals(target.getF_STATUS(), "C")) {
+                                    d.put("ERROR_DETAILS","XML Created but not sent");
+                                    d.put("rf_STATUS","E");
+                                }else if (Objects.equals(target.getF_STATUS(), "E")){
+                                    d.put("ERROR_DETAILS",target.getF_ERROR() == null ? "Error in Murex" : target.getF_ERROR());
+                                    d.put("rf_STATUS","E");
 
-In 2009, Mrs. Shalini Desai, a homemaker from Rajkot, invested her savings into a fixed deposit at her neighbourhood bank branch. At the time, she intended it to be a safe cushion for future needs. However, as the years passed, she became increasingly occupied with household responsibilities, caring for her family, and managing daily life. As a result, she neither renewed the fixed deposit upon its maturity nor carried out any transactions that would keep the account active. 
+                                } else if (Objects.equals(target.getF_STATUS(), "I")) {
+                                    d.put("ERROR_DETAILS","Problem in Sending to Murex");
+                                    d.put("rf_STATUS","E");
 
-The deposit matured in 2019, but since there were no customer-induced transactions for a continuous period of ten years, the bank—following the Reserve Bank of India (RBI) guidelines—classified the deposit as “unclaimed.” Consequently, the balance was transferred to a fund created by RBI to protect dormant money and promote financial literacy.
+                                } else if (Objects.equals(target.getF_STATUS(), "P")) {
+                                    d.put("ERROR_DETAILS","Sent to Murex");
+                                    d.put("rf_STATUS","E");
 
-In 2022, while reviewing his late mother’s financial history, Mrs. Desai’s son visited the branch to enquire about any old or forgotten accounts. Using the UDGAM portal, an online platform introduced by RBI to help customers search for unclaimed deposits across multiple banks, he discovered that his mother’s fixed deposit had indeed been transferred to the DEAF account due to prolonged inactivity.
+                                }
+                            });}
 
-The bank staff guided him through the reclaiming process. Once all documents were verified and the branch was satisfied with the legitimacy of the claim, the bank processed the request. The account was reactivated for settlement purposes, and the due amount—which included principal plus interest (as mandated by RBI for unclaimed interest-bearing deposits transferred to the DEAF)—was credited to the legal heir. 
-with this info answer the following
+                resData.add(d);
+            }
 
-Hi, SRIJAN. When you submit this form, the owner will see your name and email address.
-1.Since Mrs. Desai passed away without registering a nominee, which of the following documents became mandatory for her son to claim the amount?
-(1 Point)
-
-Survivor certificate issued by the bank manager
-
-Self-declaration and PAN card
-
-Indemnity bond from a gazetted officer
-
-Succession certificate proving legal heirship
-2.Which of the following is the primary reason the UDGAM portal played a crucial role in the son’s discovery process?
-(1 Point)
-
-It allows users to directly withdraw money from DEAF
-
-It helps banks generate succession certificates
-
-It centralizes unclaimed deposit information across multiple banks
-
-It automatically renews unclaimed fixed deposits
-3.For Mrs. Desai’s fixed deposit, which specific condition triggered the transfer of funds to the DEA Fund?
-(1 Point)
-
-Non-renewal of the fixed deposit on the maturity date
-
-Failure to update KYC for more than five years
-
-Death of the account holder without nomination
-
-Absence of any customer-induced transaction for ten years after account opening/maturity
-4.Which of the following best explains why the bank could pay interest on Mrs. Desai’s deposit even after it was transferred to the DEA Fund?
-(1 Point)
-
-Interest is automatically credited by the UDGAM portal at the time of claim
-
-RBI mandates that all DEAF balances earn the same interest as savings accounts
-
-Interest is payable only if the bank chooses to award it as a goodwill gesture
-
-RBI allows banks to pay interest on unclaimed interest-bearing deposits that get transferred to DEAF
-5.In the claim process described to son of Mrs Desai, which entity is responsible for reimbursing the bank after it has settled the claim with the legal heir?
-(1 Point)
-
-UDGAM Portal Authority
-
-Deposit Insurance and Credit Guarantee Corporation (DICGC)
-
-Ministry of Finance
-
-Depositor Education and Awareness Fund (DEA Fund) maintained by RBI
+            response.setResponseType(0);
+            response.setData(map.writeValueAsString(resData));
+            response.setError("");
+            String strResponse = map.writeValueAsString(response);
+            return strResponse;
+        } catch (JsonProcessingException var8) {
+            String str = "{\"responseType\":1,\"data\":\"Failed\",\"error\":\"Could not process JSON\"}";
+            return str;
+        }
+    }
