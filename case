@@ -1,60 +1,146 @@
+String HtmlTemplate =
+"<!DOCTYPE html>\n" +
+"<html>\n" +
+"<head>\n" +
+"<style>\n" +
+"body {\n" +
+"    font-family: Arial, sans-serif;\n" +
+"    color: #333333;\n" +
+"    line-height: 1.6;\n" +
+"    margin: 20px;\n" +
+"}\n" +
+".header {\n" +
+"    font-size: 18px;\n" +
+"    font-weight: bold;\n" +
+"    color: #003366;\n" +
+"    margin-bottom: 20px;\n" +
+"}\n" +
+"table {\n" +
+"    border-collapse: collapse;\n" +
+"    width: 100%;\n" +
+"    margin-top: 15px;\n" +
+"}\n" +
+"th, td {\n" +
+"    border: 1px solid #dcdcdc;\n" +
+"    padding: 8px;\n" +
+"    text-align: left;\n" +
+"}\n" +
+"th {\n" +
+"    background-color: #f2f2f2;\n" +
+"}\n" +
+".footer {\n" +
+"    margin-top: 25px;\n" +
+"}\n" +
+".note {\n" +
+"    margin-top: 20px;\n" +
+"    font-size: 12px;\n" +
+"    color: #666666;\n" +
+"}\n" +
+"</style>\n" +
+"</head>\n" +
+"<body>\n" +
+
+"<div class='header'>Pending Accounting Notification</div>\n" +
+
+"<p>Dear Sir/Madam,</p>\n" +
+
+"<p>\n" +
+"Accounting activity is pending for the following branch(es):\n" +
+"<b>{{branchCode}}</b>\n" +
+"</p>\n" +
+
+"<table>\n" +
+"<tr>\n" +
+"<th>Total Pending Trades</th>\n" +
+"<td>{{pendingTradeCount}}</td>\n" +
+"</tr>\n" +
+"</table>\n" +
+
+"<p><b>Pending Trade Details</b></p>\n" +
+
+"<table>\n" +
+"<tr>\n" +
+"<th>Trade Number</th>\n" +
+"<th>Trade Date</th>\n" +
+"<th>Branch Code</th>\n" +
+"</tr>\n" +
+"{{tradeRows}}\n" +
+"</table>\n" +
+
+"<div class='footer'>\n" +
+"Regards,<br>\n" +
+"Team rForex\n" +
+"</div>\n" +
+
+"<div class='note'>\n" +
+"<b>THIS IS A SYSTEM GENERATED MAIL. PLEASE DO NOT REPLY TO THIS EMAIL.</b>\n" +
+"</div>\n" +
+
+"</body>\n" +
+"</html>";
 
 
-### **1. What are DEAF accounts and which funds are transferred to the DEA Fund?**
+private void sendMail(String email,
+                      Set<String> branchCode,
+                      List<TradeInfo> pendingTrades) {
 
-DEAF accounts relate to **unclaimed or inoperative deposits** that are transferred to the **Depositor Education and Awareness (DEA) Fund** maintained by RBI after **10 years of no customer-initiated transactions**.
+    Template temp = new Template();
 
-Eligible funds include:
+    String branches = String.join(", ", branchCode);
 
-Savings and current account balances
-Fixed and recurring deposits (including matured but unrenewed FDs)
-Unclaimed interest
-Balances in foreign travel cards or prepaid instruments
+    StringBuilder tradeRows = new StringBuilder();
 
----
+    for (TradeInfo trade : pendingTrades) {
 
-### **2. Explain the process of transfer of funds to DEAF in Lily Mehra’s case.**
+        tradeRows.append("<tr>")
+                 .append("<td>").append(trade.getTradeNumber()).append("</td>")
+                 .append("<td>").append(trade.getTradeDate()).append("</td>")
+                 .append("<td>").append(trade.getBranchCode()).append("</td>")
+                 .append("</tr>");
+    }
 
-In Lily’s case, her father’s foreign travel card remained inactive for many years after his death.
-The bank:
+    Map<String, String> data = new HashMap<>();
 
-Identified the account as inactive
-Issued a prior notice
-Transferred the unclaimed balance to the **DEA Fund** as per RBI norms
-Maintained records to enable future claims
+    data.put("branchCode", branches);
+    data.put("pendingTradeCount",
+             String.valueOf(pendingTrades.size()));
+    data.put("tradeRows",
+             tradeRows.toString());
 
-Her spouse assisted her, but the transfer was strictly based on regulatory guidelines.
+    String htmlContent =
+            prepareTemplate(temp.getHtmlTemplate(),
+                            data,
+                            data.size());
 
----
+    Map<String, Object> jsonPayload = new HashMap<>();
 
-### **3. Explain the process of claim and nominee claim in DEAF accounts.**
+    jsonPayload.put("mailContent", htmlContent);
 
-To claim the amount:
+    jsonPayload.put("mailSubject",
+            "Pending Accounting Trades Notification");
 
-Lily searched the deposit on the **UDGAM portal**
-Approached the issuing bank
-Submitted KYC documents, death certificate, and legal heir declaration
-Bank verified the claim and credited the amount to her account
-The bank later recovered the amount from the DEA Fund
+    jsonPayload.put("sourceSystem", "rForex");
 
-In absence of a nominee, the **legal heir** is entitled to claim.
+    jsonPayload.put("mailRecipients", email);
 
----
+    jsonPayload.put("mailContentWithFileNames", null);
 
-### **4. Which portal is used to enquire about DEAF accounts and what interest rate was applied?**
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_JSON);
 
-Portal:UDGAM (Unclaimed Deposits – Gateway to Access Information)
-Interest Rate:4.5% per annum, paid by the bank at settlement
+    RestTemplate restTemplate = new RestTemplate();
 
----
+    HttpEntity<Map<String, Object>> entity =
+            new HttpEntity<>(jsonPayload, headers);
 
-### **5. Can CSP participate in settlement of DEAF accounts?
+    String response =
+            restTemplate.exchange(
+                    mailUrl,
+                    HttpMethod.POST,
+                    entity,
+                    String.class)
+                    .getBody();
 
-CSPs can only assist in guidance and information.
-They cannot directly settle DEAF claims.
+    System.out.println(response);
+}
 
-Precautions:
-
-Settlement must be done at the bank branch
-Proper KYC and legal verification are mandatory
-No cash payments; amount is credited to bank account
