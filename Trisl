@@ -1,0 +1,102 @@
+public Map<Long, List<ExsRatePosition>> getGroupedData(String date) {
+
+    List<ExsRatePosition> todayData =
+            positioningDataRepository.findAllPosition(date);
+
+    if (todayData == null || todayData.isEmpty()) {
+        return new LinkedHashMap<Long, List<ExsRatePosition>>();
+    }
+
+    Set<Long> origIds = todayData.stream()
+            .map(ExsRatePosition::getE_ORIG_ID)
+            .collect(Collectors.toSet());
+
+    Set<Long> todayEntityIds = todayData.stream()
+            .map(ExsRatePosition::getId)
+            .collect(Collectors.toSet());
+
+    List<ExsRatePosition> allMatchingData =
+            positioningDataRepository.findByOrigId(origIds);
+
+    Map<Long, List<ExsRatePosition>> allDataByOrigId =
+            allMatchingData.stream()
+                    .collect(Collectors.groupingBy(
+                            ExsRatePosition::getE_ORIG_ID
+                    ));
+
+    Map<Long, List<ExsRatePosition>> groups =
+            todayData.stream()
+                    .collect(Collectors.groupingBy(
+                            ExsRatePosition::getE_GROUP_ID,
+                            () -> new TreeMap<Long, List<ExsRatePosition>>(
+                                    Collections.reverseOrder()
+                            ),
+                            Collectors.toList()
+                    ));
+
+    Set<Long> processedOrigIds =
+            new HashSet<Long>();
+
+    Iterator<Map.Entry<Long, List<ExsRatePosition>>> groupIterator =
+            groups.entrySet().iterator();
+
+    while (groupIterator.hasNext()) {
+
+        Map.Entry<Long, List<ExsRatePosition>> entry =
+                groupIterator.next();
+
+        List<ExsRatePosition> currentGroup =
+                entry.getValue();
+
+        Iterator<ExsRatePosition> recordIterator =
+                currentGroup.iterator();
+
+        while (recordIterator.hasNext()) {
+
+            ExsRatePosition entity =
+                    recordIterator.next();
+
+            Long origId =
+                    entity.getE_ORIG_ID();
+
+            if (processedOrigIds.contains(origId)) {
+                recordIterator.remove();
+            } else {
+                processedOrigIds.add(origId);
+            }
+        }
+
+        List<ExsRatePosition> additionalEntities =
+                new ArrayList<ExsRatePosition>();
+
+        for (ExsRatePosition todayEntity : currentGroup) {
+
+            Long origId =
+                    todayEntity.getE_ORIG_ID();
+
+            List<ExsRatePosition> matchingEntities =
+                    allDataByOrigId.get(origId);
+
+            if (matchingEntities == null) {
+                continue;
+            }
+
+            for (ExsRatePosition matchingEntity : matchingEntities) {
+
+                if (todayEntityIds.contains(matchingEntity.getId())) {
+                    continue;
+                }
+
+                additionalEntities.add(matchingEntity);
+            }
+        }
+
+        currentGroup.addAll(additionalEntities);
+
+        if (currentGroup.isEmpty()) {
+            groupIterator.remove();
+        }
+    }
+
+    return groups;
+}
