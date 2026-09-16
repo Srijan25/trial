@@ -1,44 +1,11 @@
-(() => {
-    const seekToEnd = () => {
-        document.querySelectorAll('video').forEach(video => {
-            if (!video.duration || !isFinite(video.duration)) return;
-
-            video.muted = true;
-            video.currentTime = Math.max(0, video.duration - 1);
-
-            video.play().catch(() => {});
-
-            console.log(
-                `Video found → ${video.duration.toFixed(1)}s | Seeked to ${(video.duration - 1).toFixed(1)}s`
-            );
-        });
-    };
-
-    seekToEnd();
-
-    document.querySelectorAll('video').forEach(video => {
-        video.addEventListener('loadedmetadata', seekToEnd);
-        video.addEventListener('canplay', seekToEnd);
-    });
-
-    new MutationObserver(() => {
-        seekToEnd();
-
-        document.querySelectorAll('video').forEach(video => {
-            if (!video.dataset.autoHandled) {
-                video.dataset.autoHandled = 'true';
-
-                video.addEventListener('loadedmetadata', seekToEnd);
-                video.addEventListener('canplay', seekToEnd);
-            }
-        });
-    }).observe(document.body, {
-        childList: true,
-        subtree: true
-    });
-
-    // Handles pages that change without a full browser reload
-    setInterval(seekToEnd, 1000);
-
-    console.log('✅ Auto-play + auto-seek enabled');
-})();
+console.log({
+    seek: document.querySelector('#seek'),
+    seekHTML: document.querySelector('#seek')?.outerHTML,
+    videoCount: document.querySelectorAll('video').length,
+    videos: [...document.querySelectorAll('video')].map(v => ({
+        duration: v.duration,
+        currentTime: v.currentTime,
+        paused: v.paused,
+        src: v.currentSrc
+    }))
+});
