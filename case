@@ -1,141 +1,18 @@
-(() => {
-  // Stop any previously running version
-  if (window.courseAutoRunner) {
-    window.courseAutoRunner.stop();
-  }
+long start = System.currentTimeMillis();
 
-  let running = false;
-  const processedButtons = new WeakSet();
+LinkedHashMap<Long, List<List<FxsRatePositionCopy>>> result =
+        positioningDataService.positionDashboard(date);
 
-  // Simulate mouse interaction
-  function simulateClick(button) {
-    button.scrollIntoView({
-      behavior: "smooth",
-      block: "center"
-    });
+System.out.println("SERVICE = "
+        + (System.currentTimeMillis() - start) + " ms");
 
-    ["pointerdown", "mousedown", "pointerup", "mouseup", "click"]
-      .forEach(type => {
-        button.dispatchEvent(new MouseEvent(type, {
-          bubbles: true,
-          cancelable: true,
-          view: window
-        }));
-      });
-  }
+start = System.currentTimeMillis();
 
-  // Find Mark as completed
-  function getCompleteButton() {
-    return document.querySelector(
-      'button[data-testid="mark-complete"]:not([disabled])'
-    );
-  }
+String json = objectMapper.writeValueAsString(result);
 
-  // Find Next Item or Continue button
-  function getNextButton() {
-    return [...document.querySelectorAll("button")].find(button => {
-      const text = button.innerText.trim().toLowerCase();
+System.out.println("SERIALIZATION = "
+        + (System.currentTimeMillis() - start) + " ms");
 
-      return (
-        (
-          button.getAttribute("aria-label") === "Go to next item" ||
-          text === "go to next item" ||
-          text === "continue"
-        ) &&
-        !button.disabled &&
-        button.offsetParent !== null
-      );
-    });
-  }
+System.out.println("JSON SIZE = " + json.length());
 
-  // Move videos near the end
-  function handleVideos() {
-    document.querySelectorAll("video").forEach(video => {
-      if (
-        video.duration &&
-        Number.isFinite(video.duration) &&
-        video.currentTime < video.duration - 5
-      ) {
-        video.currentTime = Math.max(0, video.duration - 5);
-      }
-    });
-  }
-
-  // Complete current item and navigate
-  function processItem() {
-    if (running) return;
-
-    const completeBtn = getCompleteButton();
-
-    if (
-      !completeBtn ||
-      completeBtn.disabled ||
-      completeBtn.offsetParent === null ||
-      processedButtons.has(completeBtn)
-    ) {
-      return;
-    }
-
-    running = true;
-    processedButtons.add(completeBtn);
-
-    // Step 1: Mark as completed
-    completeBtn.click();
-    console.log("✅ Mark as completed");
-
-    // Step 2: Wait for Next Item / Continue
-    let attempts = 0;
-
-    const waitForNext = setInterval(() => {
-      attempts++;
-
-      const nextBtn = getNextButton();
-
-      if (nextBtn) {
-        clearInterval(waitForNext);
-
-        simulateClick(nextBtn);
-        console.log("➡️ Next item / Continue clicked");
-
-        running = false;
-      }
-
-      if (attempts >= 30) {
-        clearInterval(waitForNext);
-        running = false;
-
-        console.log("⚠️ Next button not found after 15 seconds");
-      }
-    }, 500);
-  }
-
-  // Run video handler every second
-  const videoTimer = setInterval(handleVideos, 1000);
-
-  // Run completion handler
-  const itemTimer = setInterval(processItem, 1000);
-
-  // Detect dynamically loaded content
-  const observer = new MutationObserver(() => {
-    handleVideos();
-    processItem();
-  });
-
-  observer.observe(document.body, {
-    childList: true,
-    subtree: true
-  });
-
-  // Save controls globally
-  window.courseAutoRunner = {
-    stop() {
-      clearInterval(videoTimer);
-      clearInterval(itemTimer);
-      observer.disconnect();
-
-      console.log("🛑 Course auto-runner stopped");
-    }
-  };
-
-  console.log("🚀 Course auto-runner started!");
-})();
+return result;
