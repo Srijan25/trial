@@ -1,18 +1,47 @@
-long start = System.currentTimeMillis();
+(async () => {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "video/*";
 
-LinkedHashMap<Long, List<List<FxsRatePositionCopy>>> result =
-        positioningDataService.positionDashboard(date);
+  input.onchange = async () => {
+    const file = input.files[0];
+    if (!file) return;
 
-System.out.println("SERVICE = "
-        + (System.currentTimeMillis() - start) + " ms");
+    const url = URL.createObjectURL(file);
 
-start = System.currentTimeMillis();
+    const video = document.createElement("video");
+    video.src = url;
+    video.muted = true;
+    video.loop = true;
+    video.playsInline = true;
 
-String json = objectMapper.writeValueAsString(result);
+    await video.play();
 
-System.out.println("SERIALIZATION = "
-        + (System.currentTimeMillis() - start) + " ms");
+    const canvas = document.createElement("canvas");
+    canvas.width = video.videoWidth || 1280;
+    canvas.height = video.videoHeight || 720;
 
-System.out.println("JSON SIZE = " + json.length());
+    const ctx = canvas.getContext("2d");
 
-return result;
+    function draw() {
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      requestAnimationFrame(draw);
+    }
+
+    draw();
+
+    const stream = canvas.captureStream(30);
+
+    navigator.mediaDevices.getUserMedia = async constraints => {
+      if (constraints?.video) {
+        console.log("🎥 Mock camera enabled");
+        return stream;
+      }
+      throw new Error("Mock camera only supports video");
+    };
+
+    console.log("✅ Selected video is now being used as the mock camera");
+  };
+
+  input.click();
+})();
