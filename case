@@ -7,10 +7,8 @@
     const file = input.files[0];
     if (!file) return;
 
-    const url = URL.createObjectURL(file);
-
     const video = document.createElement("video");
-    video.src = url;
+    video.src = URL.createObjectURL(file);
     video.muted = true;
     video.loop = true;
     video.playsInline = true;
@@ -18,8 +16,8 @@
     await video.play();
 
     const canvas = document.createElement("canvas");
-    canvas.width = video.videoWidth || 1280;
-    canvas.height = video.videoHeight || 720;
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
 
     const ctx = canvas.getContext("2d");
 
@@ -27,20 +25,26 @@
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
       requestAnimationFrame(draw);
     }
-
     draw();
 
     const stream = canvas.captureStream(30);
 
-    navigator.mediaDevices.getUserMedia = async constraints => {
-      if (constraints?.video) {
-        console.log("🎥 Mock camera enabled");
-        return stream;
-      }
-      throw new Error("Mock camera only supports video");
-    };
+    const preview = document.createElement("video");
+    preview.srcObject = stream;
+    preview.autoplay = true;
+    preview.muted = true;
+    preview.controls = true;
 
-    console.log("✅ Selected video is now being used as the mock camera");
+    preview.style.cssText =
+      "position:fixed;top:20px;left:20px;width:500px;z-index:999999;border:4px solid lime;background:black";
+
+    document.body.appendChild(preview);
+
+    await preview.play();
+
+    console.log("✅ MOCK CAMERA STREAM WORKING");
+    console.log("Stream:", stream);
+    console.log("Video tracks:", stream.getVideoTracks());
   };
 
   input.click();
