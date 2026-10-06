@@ -1,0 +1,475 @@
+import { Component, OnInit } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+
+interface Transaction {
+  f_EVENT: string;
+  f_ID: number;
+  f_STATUS: string;
+  f_GROUP_ID: number;
+  f_DEAL_TYPE: string;
+  f_REQUEST_TIME: string;
+  f_SRC_SYSTEM: string;
+  f_ORIG_ID: number;
+  f_EXT_NO: string;
+  f_ERROR: string | null;
+  f_MX_RESPONSE: string | null;
+}
+
+interface GroupData {
+  groupId: number;
+  transactions: Transaction[];
+  latestTransaction: Transaction;
+  transactionCount: number;
+  errorCount: number;
+}
+
+@Component({
+  selector: 'app-transaction-dashboard',
+  templateUrl: './transaction-dashboard.component.html',
+  styleUrls: ['./transaction-dashboard.component.css']
+})
+export class TransactionDashboardComponent implements OnInit {
+
+  useMockData = true;
+
+  apiUrl = 'YOUR_API_URL_HERE';
+
+  groups: GroupData[] = [];
+
+  filteredGroups: GroupData[] = [];
+
+  selectedGroup: GroupData | null = null;
+
+  selectedTransaction: Transaction | null = null;
+
+  searchText = '';
+
+  statusFilter = 'ALL';
+
+  loading = false;
+
+  totalGroups = 0;
+
+  totalTransactions = 0;
+
+  totalErrors = 0;
+
+  totalSuccess = 0;
+
+  constructor(private http: HttpClient) {}
+
+  ngOnInit(): void {
+    this.loadData();
+  }
+
+  loadData(): void {
+
+    this.loading = true;
+
+    if (this.useMockData) {
+
+      setTimeout(() => {
+        this.processApiResponse(this.getMockData());
+        this.loading = false;
+      }, 500);
+
+      return;
+    }
+
+    this.http.get<any>(this.apiUrl).subscribe({
+      next: (response) => {
+        this.processApiResponse(response);
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('API Error:', error);
+        this.loading = false;
+      }
+    });
+  }
+
+  processApiResponse(response: any): void {
+
+    const result: GroupData[] = [];
+
+    Object.keys(response).forEach(groupKey => {
+
+      const groupId = Number(groupKey);
+
+      const nestedData = response[groupKey];
+
+      const transactions: Transaction[] = [];
+
+      if (Array.isArray(nestedData)) {
+
+        nestedData.forEach(item => {
+
+          if (Array.isArray(item)) {
+
+            item.forEach(transaction => {
+
+              if (transaction) {
+                transactions.push(transaction);
+              }
+
+            });
+
+          } else if (item) {
+
+            transactions.push(item);
+
+          }
+
+        });
+
+      }
+
+      if (transactions.length === 0) {
+        return;
+      }
+
+      transactions.sort((a, b) => {
+        return Number(b.f_ID) - Number(a.f_ID);
+      });
+
+      const errorCount = transactions.filter(transaction => {
+        return this.isError(transaction);
+      }).length;
+
+      result.push({
+        groupId: groupId,
+        transactions: transactions,
+        latestTransaction: transactions[0],
+        transactionCount: transactions.length,
+        errorCount: errorCount
+      });
+
+    });
+
+    result.sort((a, b) => b.groupId - a.groupId);
+
+    this.groups = result;
+
+    this.filteredGroups = [...result];
+
+    this.calculateSummary();
+  }
+
+  calculateSummary(): void {
+
+    this.totalGroups = this.groups.length;
+
+    this.totalTransactions = this.groups.reduce(
+      (total, group) => total + group.transactionCount,
+      0
+    );
+
+    this.totalErrors = this.groups.reduce(
+      (total, group) => total + group.errorCount,
+      0
+    );
+
+    this.totalSuccess = this.totalTransactions - this.totalErrors;
+  }
+
+  isError(transaction: Transaction): boolean {
+
+    if (transaction.f_ERROR !== null &&
+        transaction.f_ERROR !== undefined &&
+        transaction.f_ERROR !== '') {
+      return true;
+    }
+
+    if (transaction.f_STATUS &&
+        transaction.f_STATUS.toUpperCase() !== 'S') {
+      return true;
+    }
+
+    return false;
+  }
+
+  getStatus(transaction: Transaction): string {
+
+    return this.isError(transaction)
+      ? 'ERROR'
+      : 'SUCCESS';
+  }
+
+  toggleGroup(group: GroupData): void {
+
+    if (this.selectedGroup?.groupId === group.groupId) {
+      this.selectedGroup = null;
+      this.selectedTransaction = null;
+      return;
+    }
+
+    this.selectedGroup = group;
+
+    this.selectedTransaction = null;
+  }
+
+  openTransaction(transaction: Transaction): void {
+
+    this.selectedTransaction = transaction;
+
+    console.log('Selected transaction:', transaction);
+
+    /*
+      Later you can call your second API here.
+
+      Example:
+
+      this.http.get<any>(
+        'YOUR_SECOND_API/' + transaction.f_ID
+      ).subscribe(response => {
+
+        this.selectedTransactionDetails = response;
+
+      });
+    */
+  }
+
+  closeTransaction(): void {
+
+    this.selectedTransaction = null;
+  }
+
+  search(): void {
+
+    const search = this.searchText
+      .trim()
+      .toLowerCase();
+
+    this.filteredGroups = this.groups.filter(group => {
+
+      const groupMatch =
+        group.groupId
+          .toString()
+          .toLowerCase()
+          .includes(search);
+
+      const transactionMatch =
+        group.transactions.some(transaction =>
+          transaction.f_ID.toString().includes(search) ||
+          transaction.f_ORIG_ID.toString().includes(search) ||
+          transaction.f_EVENT.toLowerCase().includes(search) ||
+          transaction.f_EXT_NO.toLowerCase().includes(search)
+        );
+
+      const matchesSearch =
+        search === '' ||
+        groupMatch ||
+        transactionMatch;
+
+      const matchesStatus =
+        this.statusFilter === 'ALL' ||
+        (this.statusFilter === 'ERROR' && group.errorCount > 0) ||
+        (this.statusFilter === 'SUCCESS' && group.errorCount === 0);
+
+      return matchesSearch && matchesStatus;
+    });
+  }
+
+  changeFilter(): void {
+
+    this.search();
+  }
+
+  refresh(): void {
+
+    this.selectedGroup = null;
+    this.selectedTransaction = null;
+
+    this.loadData();
+  }
+
+  getErrorCount(group: GroupData): number {
+
+    return group.transactions.filter(transaction =>
+      this.isError(transaction)
+    ).length;
+  }
+
+  getMockData(): any {
+
+    return {
+
+      "580": [
+
+        [
+          {
+            "f_EVENT": "CANCELREISSUE",
+            "f_ID": 72120,
+            "f_STATUS": "S",
+            "f_GROUP_ID": 580,
+            "f_DEAL_TYPE": "FXSPOT",
+            "f_REQUEST_TIME": "2026-08-10",
+            "f_SRC_SYSTEM": "TEST",
+            "f_ORIG_ID": 1218,
+            "f_EXT_NO": "011126050000163",
+            "f_ERROR": null,
+            "f_MX_RESPONSE": null
+          }
+        ],
+
+        [
+          {
+            "f_EVENT": "INS",
+            "f_ID": 72124,
+            "f_STATUS": "S",
+            "f_GROUP_ID": 580,
+            "f_DEAL_TYPE": "OUTRIGHT",
+            "f_REQUEST_TIME": "2026-08-10",
+            "f_SRC_SYSTEM": "TEST",
+            "f_ORIG_ID": 72124,
+            "f_EXT_NO": "0069126TS0000792",
+            "f_ERROR": null,
+            "f_MX_RESPONSE": null
+          }
+        ],
+
+        [
+          {
+            "f_EVENT": "CANCEL",
+            "f_ID": 72123,
+            "f_STATUS": "S",
+            "f_GROUP_ID": 580,
+            "f_DEAL_TYPE": "OUTRIGHT",
+            "f_REQUEST_TIME": "2026-08-10",
+            "f_SRC_SYSTEM": "TEST",
+            "f_ORIG_ID": 72119,
+            "f_EXT_NO": "0069126TP0000752",
+            "f_ERROR": null,
+            "f_MX_RESPONSE": null
+          }
+        ],
+
+        [
+          {
+            "f_EVENT": "INS",
+            "f_ID": 72119,
+            "f_STATUS": "S",
+            "f_GROUP_ID": 580,
+            "f_DEAL_TYPE": "OUTRIGHT",
+            "f_REQUEST_TIME": "2026-08-10",
+            "f_SRC_SYSTEM": "TEST",
+            "f_ORIG_ID": 72119,
+            "f_EXT_NO": "0069126TP0000752",
+            "f_ERROR": null,
+            "f_MX_RESPONSE": null
+          }
+        ]
+
+      ],
+
+      "579": [
+
+        [
+          {
+            "f_EVENT": "INS",
+            "f_ID": 72119,
+            "f_STATUS": "S",
+            "f_GROUP_ID": 579,
+            "f_DEAL_TYPE": "OUTRIGHT",
+            "f_REQUEST_TIME": "2026-08-10",
+            "f_SRC_SYSTEM": "TEST",
+            "f_ORIG_ID": 72119,
+            "f_EXT_NO": "0069126TP0000752",
+            "f_ERROR": null,
+            "f_MX_RESPONSE": null
+          }
+        ],
+
+        [
+          {
+            "f_EVENT": "CANCEL",
+            "f_ID": 72118,
+            "f_STATUS": "E",
+            "f_GROUP_ID": 579,
+            "f_DEAL_TYPE": "OUTRIGHT",
+            "f_REQUEST_TIME": "2026-08-10",
+            "f_SRC_SYSTEM": "TEST",
+            "f_ORIG_ID": 72118,
+            "f_EXT_NO": "0069126TP0000751",
+            "f_ERROR": "Cancellation failed - Invalid trade state",
+            "f_MX_RESPONSE": "FAILED"
+          }
+        ]
+
+      ],
+
+      "581": [
+
+        [
+          {
+            "f_EVENT": "INS",
+            "f_ID": 72125,
+            "f_STATUS": "S",
+            "f_GROUP_ID": 581,
+            "f_DEAL_TYPE": "OUTRIGHT",
+            "f_REQUEST_TIME": "2026-08-10",
+            "f_SRC_SYSTEM": "TEST",
+            "f_ORIG_ID": 72125,
+            "f_EXT_NO": "0069126TP0000801",
+            "f_ERROR": null,
+            "f_MX_RESPONSE": null
+          }
+        ],
+
+        [
+          {
+            "f_EVENT": "CANCEL",
+            "f_ID": 72126,
+            "f_STATUS": "E",
+            "f_GROUP_ID": 581,
+            "f_DEAL_TYPE": "OUTRIGHT",
+            "f_REQUEST_TIME": "2026-08-10",
+            "f_SRC_SYSTEM": "TEST",
+            "f_ORIG_ID": 72125,
+            "f_EXT_NO": "0069126TP0000801",
+            "f_ERROR": "Trade cancellation rejected",
+            "f_MX_RESPONSE": "REJECTED"
+          }
+        ],
+
+        [
+          {
+            "f_EVENT": "INS",
+            "f_ID": 72127,
+            "f_STATUS": "S",
+            "f_GROUP_ID": 581,
+            "f_DEAL_TYPE": "FXSWAP",
+            "f_REQUEST_TIME": "2026-08-10",
+            "f_SRC_SYSTEM": "TEST",
+            "f_ORIG_ID": 1219,
+            "f_EXT_NO": "0111260SO000188",
+            "f_ERROR": null,
+            "f_MX_RESPONSE": null
+          }
+        ]
+
+      ],
+
+      "578": [
+
+        [
+          {
+            "f_EVENT": "INS",
+            "f_ID": 72118,
+            "f_STATUS": "S",
+            "f_GROUP_ID": 578,
+            "f_DEAL_TYPE": "OUTRIGHT",
+            "f_REQUEST_TIME": "2026-08-10",
+            "f_SRC_SYSTEM": "TEST",
+            "f_ORIG_ID": 72118,
+            "f_EXT_NO": "0069126TP0000756",
+            "f_ERROR": null,
+            "f_MX_RESPONSE": null
+          }
+        ]
+
+      ]
+
+    };
+  }
+}
