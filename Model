@@ -1,0 +1,21 @@
+export interface Transaction {
+  f_EVENT: string;
+  f_ID: number;
+  f_STATUS: string;
+  f_GROUP_ID: number;
+  f_DEAL_TYPE: string;
+  f_REQUEST_TIME: string;
+  f_SRC_SYSTEM: string;
+  f_ORIG_ID: number;
+  f_EXT_NO: string;
+  f_ERROR: string | null;
+  f_MX_RESPONSE: string | null;
+}
+
+export interface GroupData {
+  groupId: number;
+  transactions: Transaction[];
+  latestTransaction: Transaction;
+  transactionCount: number;
+  errorCount: number;
+}
