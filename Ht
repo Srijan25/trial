@@ -1,0 +1,1055 @@
+<div class="monitor">
+
+  <!-- HEADER -->
+
+  <header class="topbar">
+
+    <div class="brand">
+
+      <div class="brand-icon">
+        ⇄
+      </div>
+
+      <div>
+        <div class="brand-title">
+          Transaction Monitor
+        </div>
+
+        <div class="brand-subtitle">
+          Group & Transaction Overview
+        </div>
+      </div>
+
+    </div>
+
+
+    <div class="global-search">
+
+      <span class="search-icon">⌕</span>
+
+      <input
+        type="text"
+        placeholder="Search Group ID, Transaction ID, Account..."
+        [(ngModel)]="searchText"
+      />
+
+      <span class="shortcut">
+        Ctrl K
+      </span>
+
+    </div>
+
+
+    <div class="top-right">
+
+      <span class="live-dot"></span>
+
+      <span>Live</span>
+
+      <span class="date">
+        {{ '01 Oct 2026' }}
+      </span>
+
+      <div class="profile">
+        SK
+      </div>
+
+    </div>
+
+  </header>
+
+
+  <div class="layout">
+
+    <!-- SIDEBAR -->
+
+    <aside class="sidebar">
+
+      <div
+        class="side-item"
+        [class.active]="currentScreen === 1"
+        (click)="backToGroups()"
+      >
+        <span>▦</span>
+        Groups
+      </div>
+
+      <div
+        class="side-item"
+        [class.active]="currentScreen === 2"
+        [class.disabled]="!selectedGroup"
+      >
+        <span>☷</span>
+        Transactions
+      </div>
+
+      <div
+        class="side-item"
+        [class.active]="currentScreen === 3"
+        [class.disabled]="!selectedTransaction"
+      >
+        <span>◉</span>
+        Details
+      </div>
+
+      <div class="side-spacer"></div>
+
+      <div class="system-status">
+
+        <span class="system-dot"></span>
+
+        <span>
+          System Online
+        </span>
+
+      </div>
+
+    </aside>
+
+
+    <!-- MAIN -->
+
+    <main class="content">
+
+
+      <!-- SCREEN 1 -->
+
+      <section
+        *ngIf="currentScreen === 1"
+        class="screen"
+      >
+
+        <div class="page-heading">
+
+          <div>
+
+            <div class="eyebrow">
+              OPERATIONS
+            </div>
+
+            <h1>
+              Group Overview
+            </h1>
+
+            <p>
+              Monitor transaction groups and their latest activity.
+            </p>
+
+          </div>
+
+          <button
+            class="refresh-btn"
+            (click)="refresh()"
+          >
+            ↻ Refresh
+          </button>
+
+        </div>
+
+
+        <!-- SUMMARY -->
+
+        <div class="summary-grid">
+
+          <div class="summary-card">
+
+            <div class="summary-icon blue">
+              ◈
+            </div>
+
+            <div>
+              <span>Total Groups</span>
+              <strong>
+                {{ totalGroups }}
+              </strong>
+            </div>
+
+          </div>
+
+
+          <div class="summary-card">
+
+            <div class="summary-icon purple">
+              ⇄
+            </div>
+
+            <div>
+              <span>Total Transactions</span>
+              <strong>
+                {{ totalTransactions }}
+              </strong>
+            </div>
+
+          </div>
+
+
+          <div class="summary-card success-card">
+
+            <div class="summary-icon green">
+              ✓
+            </div>
+
+            <div>
+              <span>Successful</span>
+              <strong>
+                {{ totalSuccess }}
+              </strong>
+            </div>
+
+          </div>
+
+
+          <div class="summary-card error-card">
+
+            <div class="summary-icon red">
+              !
+            </div>
+
+            <div>
+              <span>Errors</span>
+              <strong>
+                {{ totalErrors }}
+              </strong>
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- TOOLBAR -->
+
+        <div class="toolbar">
+
+          <div class="toolbar-search">
+
+            <span>⌕</span>
+
+            <input
+              [(ngModel)]="searchText"
+              placeholder="Search Group ID..."
+            />
+
+          </div>
+
+
+          <select [(ngModel)]="statusFilter">
+
+            <option value="ALL">
+              All Status
+            </option>
+
+            <option value="SUCCESS">
+              Success
+            </option>
+
+            <option value="ERROR">
+              Errors
+            </option>
+
+          </select>
+
+
+          <button
+            class="clear-btn"
+            (click)="searchText=''; statusFilter='ALL'"
+          >
+            Clear
+          </button>
+
+        </div>
+
+
+        <!-- TABLE -->
+
+        <div class="table-card">
+
+          <div class="table-title">
+
+            <div>
+              Group List
+            </div>
+
+            <span>
+              {{ filteredGroups.length }} groups
+            </span>
+
+          </div>
+
+
+          <div
+            *ngIf="loading"
+            class="loading"
+          >
+            Loading transaction data...
+          </div>
+
+
+          <div
+            *ngIf="errorMessage"
+            class="api-error"
+          >
+            {{ errorMessage }}
+          </div>
+
+
+          <div
+            class="table-wrapper"
+            *ngIf="!loading && !errorMessage"
+          >
+
+            <table>
+
+              <thead>
+
+                <tr>
+
+                  <th>#</th>
+
+                  <th>GROUP ID</th>
+
+                  <th>TRANSACTIONS</th>
+
+                  <th>LATEST TRANSACTION</th>
+
+                  <th>EVENT</th>
+
+                  <th>DEAL TYPE</th>
+
+                  <th>STATUS</th>
+
+                  <th>ERROR COUNT</th>
+
+                  <th></th>
+
+                </tr>
+
+              </thead>
+
+
+              <tbody>
+
+                <tr
+                  *ngFor="
+                    let group of filteredGroups;
+                    let i = index
+                  "
+                  [class.has-error]="group.errorCount > 0"
+                  (click)="openGroup(group)"
+                >
+
+                  <td>
+                    {{ i + 1 }}
+                  </td>
+
+
+                  <td>
+
+                    <div class="group-id">
+
+                      <span
+                        class="group-indicator"
+                        [class.error]="group.errorCount > 0"
+                      ></span>
+
+                      {{ group.groupId }}
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <span class="count-badge">
+                      {{ group.total }}
+                    </span>
+
+                  </td>
+
+
+                  <td>
+
+                    <div
+                      *ngIf="group.latestTransaction"
+                      class="latest"
+                    >
+
+                      <strong>
+                        {{ group.latestTransaction.f_ID }}
+                      </strong>
+
+                      <small>
+                        {{ formatDate(
+                          group.latestTransaction.f_REQUEST_TIME
+                        ) }}
+                      </small>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    {{ group.latestTransaction?.f_EVENT || '-' }}
+
+                  </td>
+
+
+                  <td>
+
+                    <span class="deal-type">
+                      {{ group.latestTransaction?.f_DEAL_TYPE || '-' }}
+                    </span>
+
+                  </td>
+
+
+                  <td>
+
+                    <span
+                      class="status-pill success"
+                      *ngIf="group.errorCount === 0"
+                    >
+                      ● {{ group.successCount }} Success
+                    </span>
+
+
+                    <span
+                      class="status-pill error"
+                      *ngIf="group.errorCount > 0"
+                    >
+                      ● {{ group.errorCount }} Error
+                    </span>
+
+                  </td>
+
+
+                  <td>
+
+                    <span
+                      class="error-number"
+                      [class.zero]="group.errorCount === 0"
+                    >
+                      {{ group.errorCount }}
+                    </span>
+
+                  </td>
+
+
+                  <td>
+
+                    <button
+                      class="view-btn"
+                      (click)="openGroup(group); $event.stopPropagation()"
+                    >
+                      View →
+                    </button>
+
+                  </td>
+
+                </tr>
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- SCREEN 2 -->
+
+      <section
+        *ngIf="currentScreen === 2 && selectedGroup"
+        class="screen"
+      >
+
+        <div class="breadcrumb">
+
+          <button
+            (click)="backToGroups()"
+            class="back-btn"
+          >
+            ←
+          </button>
+
+          <span
+            (click)="backToGroups()"
+          >
+            Groups
+          </span>
+
+          <b>/</b>
+
+          <strong>
+            {{ selectedGroup.groupId }}
+          </strong>
+
+        </div>
+
+
+        <div class="page-heading">
+
+          <div>
+
+            <div class="eyebrow">
+              GROUP TRANSACTIONS
+            </div>
+
+            <h1>
+              Group {{ selectedGroup.groupId }}
+
+              <span
+                class="heading-status error"
+                *ngIf="selectedGroup.errorCount > 0"
+              >
+                {{ selectedGroup.errorCount }} Errors
+              </span>
+
+            </h1>
+
+            <p>
+              {{ selectedGroup.total }} transactions
+              ·
+              {{ selectedGroup.successCount }} successful
+              ·
+              {{ selectedGroup.errorCount }} errors
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <!-- GROUP STATS -->
+
+        <div class="group-stats">
+
+          <div class="mini-card green">
+
+            <span>Success</span>
+
+            <strong>
+              {{ selectedGroup.successCount }}
+            </strong>
+
+          </div>
+
+
+          <div class="mini-card red">
+
+            <span>Errors</span>
+
+            <strong>
+              {{ selectedGroup.errorCount }}
+            </strong>
+
+          </div>
+
+
+          <div class="mini-card blue">
+
+            <span>Total</span>
+
+            <strong>
+              {{ selectedGroup.total }}
+            </strong>
+
+          </div>
+
+
+          <div class="mini-card">
+
+            <span>Latest ID</span>
+
+            <strong>
+              {{ selectedGroup.latestTransaction?.f_ID }}
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <!-- TRANSACTION TABLE -->
+
+        <div class="table-card">
+
+          <div class="table-title">
+
+            <div>
+              Transactions
+            </div>
+
+            <span>
+              Click a transaction for details
+            </span>
+
+          </div>
+
+
+          <div class="table-wrapper">
+
+            <table>
+
+              <thead>
+
+                <tr>
+
+                  <th>#</th>
+
+                  <th>f_ID</th>
+
+                  <th>f_EVENT</th>
+
+                  <th>f_STATUS</th>
+
+                  <th>f_DEAL_TYPE</th>
+
+                  <th>f_REQUEST_TIME</th>
+
+                  <th>f_SRC_SYSTEM</th>
+
+                  <th>f_ORIG_ID</th>
+
+                  <th>f_EXT_NO</th>
+
+                  <th>f_ERROR</th>
+
+                  <th></th>
+
+                </tr>
+
+              </thead>
+
+
+              <tbody>
+
+                <tr
+                  *ngFor="
+                    let transaction of selectedGroup.transactions;
+                    let i = index
+                  "
+                  class="transaction-row"
+                  [class.error-row]="
+                    transaction.f_STATUS !== 'S'
+                  "
+                  (click)="openTransaction(transaction)"
+                >
+
+                  <td>
+                    {{ i + 1 }}
+                  </td>
+
+                  <td>
+                    <strong>
+                      {{ transaction.f_ID }}
+                    </strong>
+                  </td>
+
+                  <td>
+
+                    <span class="event-badge">
+                      {{ transaction.f_EVENT }}
+                    </span>
+
+                  </td>
+
+                  <td>
+
+                    <span
+                      class="status-letter success"
+                      *ngIf="transaction.f_STATUS === 'S'"
+                    >
+                      S
+                    </span>
+
+                    <span
+                      class="status-letter error"
+                      *ngIf="transaction.f_STATUS !== 'S'"
+                    >
+                      {{ transaction.f_STATUS }}
+                    </span>
+
+                  </td>
+
+                  <td>
+                    {{ transaction.f_DEAL_TYPE }}
+                  </td>
+
+                  <td>
+                    {{ transaction.f_REQUEST_TIME }}
+                  </td>
+
+                  <td>
+                    {{ transaction.f_SRC_SYSTEM }}
+                  </td>
+
+                  <td>
+                    {{ transaction.f_ORIG_ID }}
+                  </td>
+
+                  <td>
+                    {{ transaction.f_EXT_NO }}
+                  </td>
+
+                  <td>
+
+                    <span
+                      *ngIf="transaction.f_ERROR"
+                      class="error-text"
+                    >
+                      {{ transaction.f_ERROR }}
+                    </span>
+
+                    <span
+                      *ngIf="!transaction.f_ERROR"
+                      class="dash"
+                    >
+                      —
+                    </span>
+
+                  </td>
+
+                  <td>
+
+                    <button
+                      class="arrow-btn"
+                      (click)="
+                        openTransaction(transaction);
+                        $event.stopPropagation()
+                      "
+                    >
+                      →
+                    </button>
+
+                  </td>
+
+                </tr>
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- SCREEN 3 -->
+
+      <section
+        *ngIf="currentScreen === 3 && selectedTransaction"
+        class="screen"
+      >
+
+        <div class="breadcrumb">
+
+          <button
+            class="back-btn"
+            (click)="backToGroupTransactions()"
+          >
+            ←
+          </button>
+
+          <span
+            (click)="backToGroups()"
+          >
+            Groups
+          </span>
+
+          <b>/</b>
+
+          <span
+            (click)="backToGroupTransactions()"
+          >
+            {{ selectedTransaction.f_GROUP_ID }}
+          </span>
+
+          <b>/</b>
+
+          <strong>
+            {{ selectedTransaction.f_ID }}
+          </strong>
+
+        </div>
+
+
+        <div class="detail-header">
+
+          <div>
+
+            <div class="eyebrow">
+              TRANSACTION DETAILS
+            </div>
+
+            <h1>
+
+              {{ selectedTransaction.f_ID }}
+
+              <span
+                class="heading-status success"
+                *ngIf="
+                  selectedTransaction.f_STATUS === 'S'
+                "
+              >
+                ✓ Success
+              </span>
+
+
+              <span
+                class="heading-status error"
+                *ngIf="
+                  selectedTransaction.f_STATUS !== 'S'
+                "
+              >
+                ! Error
+              </span>
+
+            </h1>
+
+            <p>
+
+              GROUP
+              {{ selectedTransaction.f_GROUP_ID }}
+
+              ·
+
+              {{ selectedTransaction.f_EVENT }}
+
+              ·
+
+              {{ selectedTransaction.f_DEAL_TYPE }}
+
+            </p>
+
+          </div>
+
+
+          <button
+            class="back-large"
+            (click)="backToGroupTransactions()"
+          >
+            ← Back to Transactions
+          </button>
+
+        </div>
+
+
+        <div class="details-layout">
+
+
+          <!-- BASIC DATA -->
+
+          <div class="details-main">
+
+            <div class="tabs">
+
+              <span class="active">
+                Basic Information
+              </span>
+
+              <span>
+                System Information
+              </span>
+
+              <span>
+                Additional Data
+              </span>
+
+            </div>
+
+
+            <div class="detail-card">
+
+              <div class="detail-grid">
+
+
+                <div class="detail-field">
+
+                  <label>
+                    f_ID
+                  </label>
+
+                  <strong>
+                    {{ selectedTransaction.f_ID }}
+                  </strong>
+
+                </div>
+
+
+                <div class="detail-field">
+
+                  <label>
+                    f_EVENT
+                  </label>
+
+                  <strong>
+                    {{ selectedTransaction.f_EVENT }}
+                  </strong>
+
+                </div>
+
+
+                <div class="detail-field">
+
+                  <label>
+                    f_STATUS
+                  </label>
+
+                  <strong>
+                    {{ selectedTransaction.f_STATUS }}
+                  </strong>
+
+                </div>
+
+
+                <div class="detail-field">
+
+                  <label>
+                    f_GROUP_ID
+                  </label>
+
+                  <strong>
+                    {{ selectedTransaction.f_GROUP_ID }}
+                  </strong>
+
+                </div>
+
+
+                <div class="detail-field">
+
+                  <label>
+                    f_DEAL_TYPE
+                  </label>
+
+                  <strong>
+                    {{ selectedTransaction.f_DEAL_TYPE }}
+                  </strong>
+
+                </div>
+
+
+                <div class="detail-field">
+
+                  <label>
+                    f_REQUEST_TIME
+                  </label>
+
+                  <strong>
+                    {{ selectedTransaction.f_REQUEST_TIME }}
+                  </strong>
+
+                </div>
+
+
+                <div class="detail-field">
+
+                  <label>
+                    f_SRC_SYSTEM
+                  </label>
+
+                  <strong>
+                    {{ selectedTransaction.f_SRC_SYSTEM }}
+                  </strong>
+
+                </div>
+
+
+                <div class="detail-field">
+
+                  <label>
+                    f_ORIG_ID
+                  </label>
+
+                  <strong>
+                    {{ selectedTransaction.f_ORIG_ID }}
+                  </strong>
+
+                </div>
+
+
+                <div class="detail-field">
+
+                  <label>
+                    f_EXT_NO
+                  </label>
+
+                  <strong>
+                    {{ selectedTransaction.f_EXT_NO }}
+                  </strong>
+
+                </div>
+
+
+                <div class="detail-field">
+
+                  <label>
+                    f_ERROR
+                  </label>
+
+                  <strong
+                    [class.error-value]="
+                      selectedTransaction.f_ERROR
+                    "
+                  >
+                    {{ selectedTransaction.f_ERROR || 'null' }}
+                  </strong>
+
+                </div>
+
+
+                <div class="detail-field full">
+
+                  <label>
+                    f_MX_RESPONSE
+                  </label>
+
+                  <pre>
+{{ selectedTransaction.f_MX_RESPONSE || 'null' }}
+                  </pre>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <!-- SECOND API -->
+
+          <aside class="additional-panel">
+
+            <div class="api-icon">
+              ↗
+            </div>
+
+            <h3>
+              Additional API Data
+            </h3>
+
+            <p>
+              More information is available for this transaction.
+            </p>
+
+
+            <button
+              class="primary-btn"
+              *ngIf="!detailsLoading"
+              (click)="loadAdditionalDetails(selectedTransaction)"
+            >
+              View Additional Details →
+            </button>
+
+
+            <div
+              clas
